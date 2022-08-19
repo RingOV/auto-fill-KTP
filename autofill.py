@@ -273,6 +273,8 @@ def readWeekDays(err = False):
     frame_2.setStyleSheet('QWidget {}')
     pushButtonFill.setText('Заполнить')
     pushButtonFill.setStyleSheet('QWidget {}')
+    labelProgress.setText('Заполнено 0 из '+str(count_hours))
+    progressBar.setValue(0)
     for i in range(6):
         if globals()['checkBoxWeek'+str(i)].isChecked():
             week_days.append(i)
@@ -338,7 +340,8 @@ def on_finished_read_hours():
         label_selected_days.setStyleSheet('QWidget {color: rgb(28, 153, 0);%s}'%WIN_css)
     else:
         label_selected_days.setStyleSheet('QWidget {color: rgb(255, 0, 0);%s}'%WIN_css)
-    win.comboBoxColumns.addItems(getColumnsNames())
+    if table_number != -1:
+        win.comboBoxColumns.addItems(getColumnsNames())
     win.comboBoxColumns.setCurrentIndex(column_with_days)
     if win.comboBoxTables.count() == 0:
         win.comboBoxTables.addItems(getListOfTables())
@@ -427,20 +430,25 @@ fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.
 
 
 def fill():
+    global list_days
     pushButtonFill.setText('Заполнить')
-    if len(list_days) == 0 or not file_name or len(list_days) < count_hours:
-        if len(list_days) == 0 or len(list_days) < count_hours:
+    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1:
+        if len(list_days) == 0 or abs(len(list_days)-count_hours) > 1:
             frame_2.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         if not file_name:
             frame_3.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         return
     if count_hours == 0:
         return
+    if len(list_days) < count_hours:
+        list_days.append('')
     fill_table_thread.start()
 
 def getTable():
     if table_number == -1:
         getListOfTables()
+    if table_number == -1:
+        return
     doc = docx.Document(file_name)
     tables = doc.tables
     return(tables[table_number])
