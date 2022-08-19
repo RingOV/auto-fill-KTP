@@ -18,7 +18,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="spacing">
-    <number>10</number>
+    <number>15</number>
    </property>
    <item>
     <widget class="QPushButton" name="pushButtonChekNewVersion">
@@ -123,10 +123,10 @@
       </sizepolicy>
      </property>
      <property name="text">
-      <string>Вопросы и предложения:</string>
+      <string>Вопросы и предложения: ringov2@mail.ru</string>
      </property>
      <property name="textFormat">
-      <enum>Qt::PlainText</enum>
+      <enum>Qt::MarkdownText</enum>
      </property>
      <property name="alignment">
       <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
@@ -135,26 +135,7 @@
       <bool>true</bool>
      </property>
      <property name="textInteractionFlags">
-      <set>Qt::NoTextInteraction</set>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>ringov2@mail.ru</string>
-     </property>
-     <property name="textFormat">
-      <enum>Qt::MarkdownText</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-     </property>
-     <property name="openExternalLinks">
-      <bool>true</bool>
-     </property>
-     <property name="textInteractionFlags">
-      <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
+      <set>Qt::TextSelectableByMouse</set>
      </property>
     </widget>
    </item>

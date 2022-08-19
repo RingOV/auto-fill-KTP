@@ -33,7 +33,7 @@ one = 2
 column_with_days = 3
 list_one = []
 
-version = 'Версия 0.9 от 19.08.2022'
+version = 'Версия 0.8 от 19.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
@@ -42,7 +42,7 @@ win_about = uic.loadUi('about.ui')
 win_about.labelVersion.setText(version)
 win_help = uic.loadUi('help.ui')
 win_help.groupBoxLink.hide()
-win_help.resize(500, 320)
+win_help.resize(500, 300)
 
 win.resize(100, 100)
 win.labelVersion.setText(version)
