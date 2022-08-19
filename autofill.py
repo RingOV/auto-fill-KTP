@@ -85,6 +85,7 @@ def fixFontIfWIN():
         win_about.label_2.setStyleSheet(font_size)
         win_about.label_3.setStyleSheet(font_size)
         win_about.label_4.setStyleSheet(font_size)
+        win_about.label_5.setStyleSheet(font_size)
         win_about.pushButton.setStyleSheet(font_size)
         win_help.label_status.setStyleSheet(font_size)
         win_help.label_link1.setStyleSheet(font_size)
@@ -92,6 +93,7 @@ def fixFontIfWIN():
         win_help.label_1.setStyleSheet(font_size)
         win_help.label_2.setStyleSheet(font_size)
         win_help.label_3.setStyleSheet(font_size)
+        win_help.label_4.setStyleSheet(font_size)
         win_help.pushButtonChekNewVersion.setStyleSheet(font_size)
         win_help.pushButton.setStyleSheet(font_size)
 
