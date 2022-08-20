@@ -33,7 +33,7 @@ one = 2
 column_with_days = 3
 list_one = []
 
-version = 'Версия 1.2 от 20.08.2022'
+version = 'Версия 1.3 от 20.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
@@ -98,6 +98,7 @@ def connectSignals():
     action_1.triggered.connect(lambda: win_help.show())
     action_2.triggered.connect(lambda: win_about.show())
     win_help.pushButtonChekNewVersion.clicked.connect(lambda: buttonCheckNewVersionClick())
+    checkBoxSetCol.clicked.connect(lambda: groupBoxSetCol.setStyleSheet('QWidget {}'))
 
 class CheckVersionThread(QtCore.QThread):
     labelStatusChangeSignal = QtCore.pyqtSignal(str)
@@ -159,7 +160,7 @@ def setColumnWithDay(index):
         return
     global column_with_days
     column_with_days = index
-    pushButtonFill.setText('Заполнить')
+    pushButtonFill.setText('Заполнить и записать в файл')
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].setChecked(False)
@@ -243,10 +244,11 @@ def readWeekDays(err = False):
     week_days = []
     double_days = []
     frame_2.setStyleSheet('QWidget {}')
-    pushButtonFill.setText('Заполнить')
+    pushButtonFill.setText('Заполнить и записать в файл')
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
+    checkBoxSetCol.setChecked(False)
     for i in range(6):
         if globals()['checkBoxWeek'+str(i)].isChecked():
             week_days.append(i)
@@ -316,6 +318,7 @@ def on_finished_read_hours():
     pushButton.setEnabled(True)
     comboBoxTables.setEnabled(True)
     comboBoxColumns.setEnabled(True)
+    checkBoxSetCol.setChecked(False)
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
     if count_hours % 34 == 0 and count_hours != 0:
@@ -355,7 +358,7 @@ read_hours_thread.labelHoursChangeSignal.connect(on_label_hours_change, QtCore.Q
 def openFiles():
     global file_name, table_number
     frame_3.setStyleSheet('QWidget {}')
-    pushButtonFill.setText('Заполнить')
+    pushButtonFill.setText('Заполнить и записать в файл')
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     label_files.setText('')
     progressBar.setValue(0)
@@ -418,12 +421,15 @@ fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.
 
 def fill():
     global list_days
-    pushButtonFill.setText('Заполнить')
-    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1 or count_hours == 0:
+    pushButtonFill.setText('Заполнить и записать в файл')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
+    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1 or count_hours == 0 or not checkBoxSetCol.isChecked():
         if len(list_days) == 0 or abs(len(list_days)-count_hours) > 1:
             frame_2.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         if not file_name or count_hours == 0:
             frame_3.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
+        if not checkBoxSetCol.isChecked():
+            groupBoxSetCol.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         return
     if count_hours == 0:
         return
