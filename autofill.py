@@ -276,7 +276,7 @@ class ReadHoursThread(QtCore.QThread):
             one = 2
             find = False
             rows = table.rows
-            for i in range(1, 5):
+            for i in range(1, 7):
                 row = rows[i].cells
                 if find:
                     break
@@ -464,18 +464,15 @@ def getColumnsNames():
     doc = docx.Document(file_name)
     tables = doc.tables
     line = 0
-    rows = [tables[table_number].rows[0].cells, tables[table_number].rows[1].cells]
-    if rows[0][0].text == rows[1][0].text:
-        line = 1
-    i = 0
-    for cell in rows[line]:
-        s = cell.text.replace('\n', ' ')
-        if line == 1:
-            s2 = rows[0][i].text.replace('\n', ' ')
-            if s != s2:
-                s = s2 + ' ' + s
-        i += 1
-        list_of_columns.append(s)
+    rows = tables[table_number].rows
+    line = rows[0].cells[0]._tc.bottom
+    for i in range(len(rows[0].cells)):
+        s = []
+        for j in range(line):
+            t = rows[j].cells[i].text.strip().replace('\n', ' ')
+            if t not in s:
+                s.append(t)
+        list_of_columns.append(' > '.join(s))
     return(list_of_columns)
 
 pushButtonFill.setFocus()
