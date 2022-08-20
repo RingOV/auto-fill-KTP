@@ -282,13 +282,28 @@ class ReadHoursThread(QtCore.QThread):
                         find = True
                         break
             list_one = []
-            for cell in table.columns[one].cells:
+            columns = table.columns[one].cells
+            for cell in columns:
                 list_one.append(0)
                 if cell.text.strip() == '1':
                     list_one[-1] = 1
                     count_hours += 1
                     self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
                     sleep(0.001)
+            if 1 not in list_one:
+                one = 0
+                column_with_days = 1
+                list_one = []
+                columns = table.columns[one].cells
+                for i in range(len(columns)):
+                    list_one.append(0)
+                    if columns[i].text.strip() != '':
+                        if columns[i].text.strip()[0].isdigit():
+                            if columns[i].text.strip() != table.columns[one+1].cells[i].text.strip():
+                                list_one[-1] = 1
+                                count_hours += 1
+                                self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
+                                sleep(0.001)
             self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
         else:
             self.labelHoursChangeSignal.emit('Таблица не найдена')
