@@ -33,7 +33,7 @@ one = 2
 column_with_days = 3
 list_one = []
 
-version = 'Версия 0.9 от 19.08.2022'
+version = 'Версия 1.0 от 20.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
@@ -63,7 +63,7 @@ def fixFontIfWIN():
         for i in range(1, 5):
             globals()['label0'+str(i)].setStyleSheet('QWidget {font-size: 12pt;}')
         win_about.setStyleSheet(font_size)
-        win_about.label.setStyleSheet(font_size)
+        win_about.label.setStyleSheet('QWidget {font-size: 17pt;}')
         win_help.setStyleSheet(font_size)
 
 def loadDateFromFile():
@@ -157,7 +157,7 @@ def setColumnWithDay(index):
     global column_with_days
     column_with_days = index
     pushButtonFill.setText('Заполнить')
-    pushButtonFill.setStyleSheet('QWidget {}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].setChecked(False)
         globals()['spinBoxWeek'+str(i)].setValue(1)
@@ -241,7 +241,7 @@ def readWeekDays(err = False):
     double_days = []
     frame_2.setStyleSheet('QWidget {}')
     pushButtonFill.setText('Заполнить')
-    pushButtonFill.setStyleSheet('QWidget {}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
     for i in range(6):
@@ -338,7 +338,7 @@ def openFiles():
     global file_name, table_number
     frame_3.setStyleSheet('QWidget {}')
     pushButtonFill.setText('Заполнить')
-    pushButtonFill.setStyleSheet('QWidget {}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     label_files.setText('')
     progressBar.setValue(0)
     labelProgress.setText('')
@@ -384,7 +384,7 @@ def on_finished_fill_table():
         globals()['frame_'+str(i)].setEnabled(True)
     pushButtonFill.setEnabled(True)
     pushButtonFill.setText('Готово')
-    pushButtonFill.setStyleSheet('QWidget {color: rgb(28, 153, 0);}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt; color: rgb(28, 153, 0);}')
 
 def on_started_fill_table():
     for i in range(4):
