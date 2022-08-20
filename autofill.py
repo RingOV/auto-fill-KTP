@@ -58,44 +58,13 @@ for i in dir(win):
 def fixFontIfWIN():
     if WIN:
         font_size = 'QWidget {font-size: 11pt;}'
-        for i in range(14):
-            globals()['label'+str(i)].setStyleSheet(font_size)
-        for i in range(6):
-            globals()['checkBoxWeek'+str(i)].setStyleSheet(font_size)
-            globals()['spinBoxWeek'+str(i)].setStyleSheet(font_size)
-            globals()['weekday'+str(i)].setStyleSheet(font_size)
+        win.setStyleSheet(font_size)
+        win.pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
         for i in range(1, 5):
             globals()['label0'+str(i)].setStyleSheet('QWidget {font-size: 12pt;}')
-        label_selected_days.setStyleSheet(font_size)
-        plainTextEdit.setStyleSheet(font_size)
-        label_all_days.setStyleSheet(font_size)
-        checkBoxYear.setStyleSheet(font_size)
-        pushButton.setStyleSheet(font_size)
-        labelHours.setStyleSheet(font_size)
-        labelProgress.setStyleSheet(font_size)
-        label_files.setStyleSheet(font_size)
-        progressBar.setStyleSheet(font_size)
-        labelVersion.setStyleSheet(font_size)
-        labelCopyright.setStyleSheet(font_size)
-        labelIdea.setStyleSheet(font_size)
-        comboBoxTables.setStyleSheet(font_size)
-        comboBoxColumns.setStyleSheet(font_size)
-        win_about.labelVersion.setStyleSheet(font_size)
-        win_about.label_1.setStyleSheet(font_size)
-        win_about.label_2.setStyleSheet(font_size)
-        win_about.label_3.setStyleSheet(font_size)
-        win_about.label_4.setStyleSheet(font_size)
-        win_about.label_5.setStyleSheet(font_size)
-        win_about.pushButton.setStyleSheet(font_size)
-        win_help.label_status.setStyleSheet(font_size)
-        win_help.label_link1.setStyleSheet(font_size)
-        win_help.label_link2.setStyleSheet(font_size)
-        win_help.label_1.setStyleSheet(font_size)
-        win_help.label_2.setStyleSheet(font_size)
-        win_help.label_3.setStyleSheet(font_size)
-        win_help.label_4.setStyleSheet(font_size)
-        win_help.pushButtonChekNewVersion.setStyleSheet(font_size)
-        win_help.pushButton.setStyleSheet(font_size)
+        win_about.setStyleSheet(font_size)
+        win_about.label.setStyleSheet(font_size)
+        win_help.setStyleSheet(font_size)
 
 def loadDateFromFile():
     if os.path.exists(os.path.join(APP_PATH, 'сохранённый диапазон дат.txt')):
