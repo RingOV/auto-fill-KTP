@@ -33,7 +33,7 @@ one = 2
 column_with_days = 3
 list_one = []
 
-version = 'Версия 1.0 от 20.08.2022'
+version = 'Версия 1.1 от 20.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
