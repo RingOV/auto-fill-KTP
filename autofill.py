@@ -33,11 +33,12 @@ one = 2
 column_with_days = 3
 list_one = []
 
-version = 'Версия 1.1 от 20.08.2022'
+version = 'Версия 1.2 от 20.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
 win = uic.loadUi('main.ui')
+win.groupBoxNewVer.hide()
 win_about = uic.loadUi('about.ui')
 win_about.labelVersion.setText(version)
 win_help = uic.loadUi('help.ui')
@@ -118,10 +119,12 @@ class CheckVersionThread(QtCore.QThread):
 
 def on_label_status_change(s):
     win_help.label_status.setText(s)
+    win.labelNewVersion.setText(s)
 
 def on_label_link_show(show):
     if show:
         win_help.groupBoxLink.show()
+        win.groupBoxNewVer.show()
     else:
         win_help.groupBoxLink.hide()
 
@@ -416,10 +419,10 @@ fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.
 def fill():
     global list_days
     pushButtonFill.setText('Заполнить')
-    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1:
+    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1 or count_hours == 0:
         if len(list_days) == 0 or abs(len(list_days)-count_hours) > 1:
             frame_2.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
-        if not file_name:
+        if not file_name or count_hours == 0:
             frame_3.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         return
     if count_hours == 0:
@@ -478,4 +481,5 @@ loadWeekDays()
 connectSignals()
 
 win.show()
+check_version_thread.start()
 sys.exit(app.exec())
