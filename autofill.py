@@ -349,7 +349,7 @@ class ReadHoursThread(QtCore.QThread):
                             # if columns[i].text.strip() != table.columns[one+1].cells[i].text.strip():
                             list_one[-1] = 1
                             count_hours += 1
-                            print(columns[i].text.strip())
+                            # print(columns[i].text.strip())
                             self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
                             sleep(0.001)
             self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
