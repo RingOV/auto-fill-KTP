@@ -71,7 +71,7 @@ def fixFontIfWIN():
     if WIN:
         font_size = 'QWidget {font-size: 11pt;}'
         win.setStyleSheet(font_size)
-        win.pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
+        win.pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
         for i in range(1, 5):
             globals()['label0'+str(i)].setStyleSheet('QWidget {font-size: 12pt;}')
         win_about.setStyleSheet(font_size)
@@ -192,7 +192,7 @@ def setColumnWithDay(index):
     global column_with_days
     column_with_days = index
     pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
-    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].setChecked(False)
         globals()['spinBoxWeek'+str(i)].setValue(1)
@@ -282,7 +282,7 @@ def readWeekDays(err = False):
     double_days2 = []
     frame_2.setStyleSheet('QWidget {}')
     pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
-    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
     checkBoxSetCol.setChecked(False)
@@ -402,7 +402,7 @@ def openFiles():
     global file_name, table_number
     frame_3.setStyleSheet('QWidget {}')
     pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
-    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
+    pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
     label_files.setText('')
     progressBar.setValue(0)
     labelProgress.setText('')
@@ -467,9 +467,9 @@ fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.
 def fill():
     global list_days
     pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
-    pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
-    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1 or count_hours == 0 or not checkBoxSetCol.isChecked():
-        if len(list_days) == 0 or abs(len(list_days)-count_hours) > 1:
+    pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
+    if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 7 or count_hours == 0 or not checkBoxSetCol.isChecked():
+        if len(list_days) == 0 or abs(len(list_days)-count_hours) > 7:
             frame_2.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
         if not file_name or count_hours == 0:
             frame_3.setStyleSheet('QWidget {background-color: rgb(255, 190, 191);}')
