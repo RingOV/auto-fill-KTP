@@ -26,19 +26,30 @@ all_days = 0
 dict_days = {}
 week_days = []
 double_days = []
+week_days2 = []
+double_days2 = []
 file_name = ''
 count_hours = 0
 table_number = -1
 one = 2
 column_with_days = 3
 list_one = []
+rewrite = True
+diff_hours = False
 
-version = 'Версия 1.3 от 20.08.2022'
+pushButtonFill_text_dict = {
+    True: 'Заполнить и перезаписать файл',
+    False: 'Заполнить и создать копию'
+}
+
+version = 'Версия 1.4 от 22.08.2022'
 
 # загрузка окна
 app = QtWidgets.QApplication([])
 win = uic.loadUi('main.ui')
 win.groupBoxNewVer.hide()
+# win.tabWidget.setTabVisible(1, False)
+win.tabWidget.tabBar().hide()
 win_about = uic.loadUi('about.ui')
 win_about.labelVersion.setText(version)
 win_help = uic.loadUi('help.ui')
@@ -88,6 +99,8 @@ def connectSignals():
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].clicked.connect(lambda: readWeekDays())
         globals()['spinBoxWeek'+str(i)].valueChanged.connect(lambda: readWeekDays())
+        globals()['checkBoxWeek'+str(i)+'_2'].clicked.connect(lambda: readWeekDays())
+        globals()['spinBoxWeek'+str(i)+'_2'].valueChanged.connect(lambda: readWeekDays())
     checkBoxYear.clicked.connect(lambda: readWeekDays())
     pushButton.clicked.connect(lambda: openFiles())
     pushButtonFill.clicked.connect(lambda: fill())
@@ -99,6 +112,24 @@ def connectSignals():
     action_2.triggered.connect(lambda: win_about.show())
     win_help.pushButtonChekNewVersion.clicked.connect(lambda: buttonCheckNewVersionClick())
     checkBoxSetCol.clicked.connect(lambda: groupBoxSetCol.setStyleSheet('QWidget {}'))
+    checkBoxRewrite.clicked.connect(checkBoxRewriteClick)
+    checkBoxDiffHours.clicked.connect(checkBoxDiffHoursClick)
+
+def checkBoxDiffHoursClick(state):
+    global diff_hours
+    diff_hours = state
+    if diff_hours:
+        win.tabWidget.tabBar().show()
+    else:
+        win.tabWidget.setCurrentIndex(0)
+        win.tabWidget.tabBar().hide()
+    readWeekDays()
+
+def checkBoxRewriteClick(state):
+    global rewrite
+    rewrite = state
+    pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
+
 
 class CheckVersionThread(QtCore.QThread):
     labelStatusChangeSignal = QtCore.pyqtSignal(str)
@@ -160,7 +191,7 @@ def setColumnWithDay(index):
         return
     global column_with_days
     column_with_days = index
-    pushButtonFill.setText('Заполнить и записать в файл')
+    pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].setChecked(False)
@@ -206,7 +237,7 @@ def saveDateToFile():
         f.write('\n'.join(list_date))
     print('Saved to file')
 
-def makeListOfDays(weekday=[], selected = False, doubleday=[]):
+def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doubleday2=[]):
     global list_days, all_days, dict_days
     if selected:
         list_days = []
@@ -216,12 +247,16 @@ def makeListOfDays(weekday=[], selected = False, doubleday=[]):
     year = ''
     if checkBoxYear.isChecked():
         year = '.%y'
+    new_year = list_date[4].split('.')[-1]
     for i in range(0, 7, 2):
         d1 = datetime.strptime(list_date[i], '%d.%m.%Y')
         d2 = datetime.strptime(list_date[i+1], '%d.%m.%Y')
         delta = d2 - d1
         for j in range(delta.days + 1):
             d = d1 + timedelta(j)
+            if diff_hours and d.year == int(new_year):
+                weekday = weekday2
+                doubleday = doubleday2
             if d.weekday() in weekday:
                 list_days.append(d.strftime('%d.%m'+year))
                 if d.weekday() in doubleday:
@@ -240,11 +275,13 @@ def checkValidDatesArr(d1, d2):
         return True
 
 def readWeekDays(err = False):
-    global week_days, double_days
+    global week_days, double_days, week_days2, double_days2
     week_days = []
     double_days = []
+    week_days2 = []
+    double_days2 = []
     frame_2.setStyleSheet('QWidget {}')
-    pushButtonFill.setText('Заполнить и записать в файл')
+    pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
@@ -254,8 +291,12 @@ def readWeekDays(err = False):
             week_days.append(i)
         if globals()['spinBoxWeek'+str(i)].value() == 2:
             double_days.append(i)
+        if globals()['checkBoxWeek'+str(i)+'_2'].isChecked():
+            week_days2.append(i)
+        if globals()['spinBoxWeek'+str(i)+'_2'].value() == 2:
+            double_days2.append(i)
     if not err:
-        makeListOfDays(week_days, True, double_days)
+        makeListOfDays(week_days, True, double_days, week_days2, double_days2)
     label_selected_days.setText('Выбрано: '+str(len(list_days)))
     plainTextEdit.setPlainText('\n'.join(list_days))
     if file_name:
@@ -295,7 +336,8 @@ class ReadHoursThread(QtCore.QThread):
                     count_hours += 1
                     self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
                     sleep(0.001)
-            if 1 not in list_one:
+            if 1 not in list_one or count_hours%34 != 0:
+                count_hours = 0
                 one = 0
                 column_with_days = 1
                 list_one = []
@@ -304,11 +346,12 @@ class ReadHoursThread(QtCore.QThread):
                     list_one.append(0)
                     if columns[i].text.strip() != '':
                         if columns[i].text.strip()[0].isdigit():
-                            if columns[i].text.strip() != table.columns[one+1].cells[i].text.strip():
-                                list_one[-1] = 1
-                                count_hours += 1
-                                self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
-                                sleep(0.001)
+                            # if columns[i].text.strip() != table.columns[one+1].cells[i].text.strip():
+                            list_one[-1] = 1
+                            count_hours += 1
+                            print(columns[i].text.strip())
+                            self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
+                            sleep(0.001)
             self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
         else:
             self.labelHoursChangeSignal.emit('Таблица не найдена')
@@ -358,7 +401,7 @@ read_hours_thread.labelHoursChangeSignal.connect(on_label_hours_change, QtCore.Q
 def openFiles():
     global file_name, table_number
     frame_3.setStyleSheet('QWidget {}')
-    pushButtonFill.setText('Заполнить и записать в файл')
+    pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     label_files.setText('')
     progressBar.setValue(0)
@@ -391,8 +434,10 @@ class FillTableThread(QtCore.QThread):
                     self.labelProgressChangeSignal.emit('Заполнено '+str(filled)+' из '+str(count_hours))
                     self.progressBarChangeSignal.emit(filled*100//count_hours)
                     sleep(0.001)
-
-            doc.save(file_name)
+            if rewrite:
+                doc.save(file_name)
+            else:
+                doc.save(file_name[:-5]+' заполнено.docx')
 
 def on_label_progress_change(s):
     labelProgress.setText(s)
@@ -421,7 +466,7 @@ fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.
 
 def fill():
     global list_days
-    pushButtonFill.setText('Заполнить и записать в файл')
+    pushButtonFill.setText(pushButtonFill_text_dict[rewrite])
     pushButtonFill.setStyleSheet('QWidget {font-size: 18pt;}')
     if len(list_days) == 0 or not file_name or abs(len(list_days)-count_hours) > 1 or count_hours == 0 or not checkBoxSetCol.isChecked():
         if len(list_days) == 0 or abs(len(list_days)-count_hours) > 1:
@@ -452,7 +497,7 @@ def getListOfTables():
     doc = docx.Document(file_name)
     tables = doc.tables
     for i in range(len(tables)):
-        if len(tables[i].rows) > 34:
+        if len(tables[i].rows) > 17:
             if table_number == -1:
                 table_number = i
                 return
