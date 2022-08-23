@@ -378,6 +378,7 @@ def on_finished_read_hours():
     win.comboBoxColumns.setCurrentIndex(column_with_days)
     if win.comboBoxTables.count() == 0:
         win.comboBoxTables.addItems(getListOfTables())
+    pushButtonFill.setFocus()
 
 def on_started_read_hours():
     pushButtonFill.setEnabled(False)
