@@ -34,7 +34,7 @@ table_number = -1
 one = 2
 column_with_days = 3
 list_one = []
-rewrite = True
+rewrite = False
 diff_hours = False
 
 pushButtonFill_text_dict = {

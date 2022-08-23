@@ -1274,7 +1274,7 @@
           <string>Перезаписать файл</string>
          </property>
          <property name="checked">
-          <bool>true</bool>
+          <bool>false</bool>
          </property>
         </widget>
        </item>
@@ -1303,7 +1303,7 @@
           <string notr="true"/>
          </property>
          <property name="text">
-          <string>Заполнить и перезаписать файл</string>
+          <string>Заполнить и создать копию</string>
          </property>
          <property name="autoDefault">
           <bool>true</bool>
