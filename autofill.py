@@ -20,7 +20,9 @@ else:
 APP_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 
 # диапазон дат четвертей
-list_date = ['01.09.2021', '31.10.2021', '08.11.2021', '28.12.2021', '10.01.2022', '20.03.2022', '28.03.2022', '22.05.2022']
+list_date = ['01.09.2022', '29.10.2022', '07.11.2022', '30.12.2022', '09.01.2023', '25.03.2023', '03.04.2023', '25.05.2023', '06.02.2023', '12.02.2023']
+list_date_holidays = ['23.02.2023', '24.02.2023', '08.03.2023', '01.05.2023', '08.05.2023', '09.05.2023']
+dict_date_replaced = {'25.05.2023': 0}
 list_days = []
 all_days = 0
 dict_days = {}
@@ -36,13 +38,29 @@ column_with_days = 3
 list_one = []
 rewrite = False
 diff_hours = False
+klass1 = False
+list_klass1 = []
 
 pushButtonFill_text_dict = {
     True: 'Заполнить и перезаписать файл',
     False: 'Заполнить и создать копию'
 }
 
-version = 'Версия 1.4 от 22.08.2022'
+dict_replaced_weekdays = {
+    0: 'по понедельнику',
+    1: 'по вторнику',
+    2: 'по среде',
+    3: 'по четвергу',
+    4: 'по пятнице',
+    5: 'по субботе'
+}
+
+list_weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
+
+version = 'Версия 1.5 от 24.08.2022'
+
+def dateFmt(date):
+    return(QtCore.QDate.fromString(date, 'dd.MM.yyyy'))
 
 # загрузка окна
 app = QtWidgets.QApplication([])
@@ -50,14 +68,15 @@ win = uic.loadUi('main.ui')
 win.groupBoxNewVer.hide()
 # win.tabWidget.setTabVisible(1, False)
 win.tabWidget.tabBar().hide()
+win.labelVersion.setText(version)
 win_about = uic.loadUi('about.ui')
 win_about.labelVersion.setText(version)
 win_help = uic.loadUi('help.ui')
 win_help.groupBoxLink.hide()
 win_help.resize(500, 300)
-
-win.resize(100, 100)
-win.labelVersion.setText(version)
+win_dialog = uic.loadUi('dialog.ui')
+win_dialog.comboBoxReplace.addItems(list_weekdays)
+win_dialog.dateEditReplace.setDate(dateFmt(list_date[0]))
 
 # получаем список всех виджетов и создаем переменные
 for i in dir(win):
@@ -79,23 +98,54 @@ def fixFontIfWIN():
         win_help.setStyleSheet(font_size)
 
 def loadDateFromFile():
+    global list_date
     if os.path.exists(os.path.join(APP_PATH, 'сохранённый диапазон дат.txt')):
         with open(os.path.join(APP_PATH, 'сохранённый диапазон дат.txt'), 'r') as f:
-            i = 0
+            list_date = []
             for line in f:
-                list_date[i] = line.strip()
-                i += 1
-    print('Loaded from file')
+                list_date.append(line.strip())
+        print('Dates Loaded from file')
+
+def loadHolidaysFromFile():
+    global list_date_holidays
+    if os.path.exists(os.path.join(APP_PATH, 'сохранённые праздничные дни.txt')):
+        with open(os.path.join(APP_PATH, 'сохранённые праздничные дни.txt'), 'r') as f:
+            list_date_holidays = []
+            for line in f:
+                list_date_holidays.append(line.strip())
+        print('Holidays loaded from file')
+
+def loadReplacedFromFile():
+    global dict_date_replaced
+    if os.path.exists(os.path.join(APP_PATH, 'сохранённые замены дней недели.txt')):
+        with open(os.path.join(APP_PATH, 'сохранённые замены дней недели.txt'), 'r') as f:
+            dict_date_replaced = {}
+            for line in f:
+                line = line.strip()
+                dict_date_replaced[line.split(';')[0]] = int(line.split(';')[1])
+        print('Replaced loaded from file')
 
 def loadDateToApp():
-    for i in range(8):
-        qdate = QtCore.QDate.fromString(list_date[i], 'dd.MM.yyyy')
-        globals()['dateEdit'+str(i)].setDate(qdate)
+    for i in range(10):
+        globals()['dateEdit'+str(i)].setDate(dateFmt(list_date[i]))
+
+def loadHolidaysToApp():
+    dateEditHoliday.setDate(dateFmt(list_date[0]))
+    listWidgetHolidays.clear()
+    listWidgetHolidays.addItems(list_date_holidays)
+
+def loadReplaceToApp():
+    s = []
+    for key, value in dict_date_replaced.items():
+        s.append(key+' '+dict_replaced_weekdays[value])
+    labelReplace.setText('Замена дней недели:\n'+'\n'.join(s))
+    win_dialog.listWidgetReplace.clear()
+    win_dialog.listWidgetReplace.addItems(s)
 
 def connectSignals():
-    for i in range(8):
+    for i in range(10):
         globals()['dateEdit'+str(i)].dateChanged.connect(lambda: changedDateEdit())
-        globals()['dateEdit'+str(i)].setStyleSheet('QWidget {%s}'%WIN_css)
+        # globals()['dateEdit'+str(i)].setStyleSheet('QWidget {%s}'%WIN_css)
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].clicked.connect(lambda: readWeekDays())
         globals()['spinBoxWeek'+str(i)].valueChanged.connect(lambda: readWeekDays())
@@ -114,6 +164,72 @@ def connectSignals():
     checkBoxSetCol.clicked.connect(lambda: groupBoxSetCol.setStyleSheet('QWidget {}'))
     checkBoxRewrite.clicked.connect(checkBoxRewriteClick)
     checkBoxDiffHours.clicked.connect(checkBoxDiffHoursClick)
+    pushButtonAddHoliday.clicked.connect(lambda: pushButtonAddHolidayClick())
+    pushButtonDeleteHoliday.clicked.connect(lambda: pushButtonDeleteHolidayClick())
+    pushButtonReplace.clicked.connect(lambda: win_dialog.show())
+    win_dialog.pushButtonAddReplace.clicked.connect(lambda: pushButtonAddReplaceClick())
+    win_dialog.pushButtonDeleteReplace.clicked.connect(lambda: pushButtonDeleteReplaceClick())
+    checkBox1klass.clicked.connect(checkBox1klassClick)
+
+def checkBox1klassClick(state):
+    global klass1
+    if state:
+        klass1 = True
+        dateEdit8.show()
+        label1klass.show()
+        dateEdit9.show()
+    else:
+        klass1 = False
+        dateEdit8.hide()
+        label1klass.hide()
+        dateEdit9.hide()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
+def pushButtonDeleteReplaceClick():
+    global dict_date_replaced
+    listItems = win_dialog.listWidgetReplace.selectedItems()
+    if not listItems:
+        return
+    for item in listItems:
+        del dict_date_replaced[item.text().split()[0]]
+    saveReplacedToFile()
+    loadReplaceToApp()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
+def pushButtonAddReplaceClick():
+    global dict_date_replaced
+    dict_date_replaced[win_dialog.dateEditReplace.dateTime().toString('dd.MM.yyyy')] = win_dialog.comboBoxReplace.currentIndex()
+    saveReplacedToFile()
+    loadReplaceToApp()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
+def pushButtonDeleteHolidayClick():
+    global list_date_holidays
+    listItems = listWidgetHolidays.selectedItems()
+    if not listItems:
+        return
+    for item in listItems:
+        list_date_holidays.remove(item.text())
+    loadHolidaysToApp()
+    saveHolidaysToFile()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
+def pushButtonAddHolidayClick():
+    global list_date_holidays
+    list_date_holidays.append(dateEditHoliday.dateTime().toString('dd.MM.yyyy'))
+    loadHolidaysToApp()
+    saveHolidaysToFile()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
 
 def checkBoxDiffHoursClick(state):
     global diff_hours
@@ -231,14 +347,27 @@ def loadWeekDays():
 
 def saveDateToFile():
     global list_date
-    for i in range(8):
+    for i in range(10):
         list_date[i] = globals()['dateEdit'+str(i)].dateTime().toString('dd.MM.yyyy')
     with open(os.path.join(APP_PATH, 'сохранённый диапазон дат.txt'), 'w') as f:
         f.write('\n'.join(list_date))
-    print('Saved to file')
+    print('Dates saved to file')
+
+def saveHolidaysToFile():
+    with open(os.path.join(APP_PATH, 'сохранённые праздничные дни.txt'), 'w') as f:
+        f.write('\n'.join(list_date_holidays))
+    print('Holidays saved to file')
+
+def saveReplacedToFile():
+    l = []
+    for key, value in dict_date_replaced.items():
+        l.append(key+';'+str(value))
+    with open(os.path.join(APP_PATH, 'сохранённые замены дней недели.txt'), 'w') as f:
+        f.write('\n'.join(l))
+    print('Replaced saved to file')
 
 def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doubleday2=[]):
-    global list_days, all_days, dict_days
+    global list_days, all_days, dict_days, list_klass1
     if selected:
         list_days = []
     all_days = 0
@@ -248,22 +377,38 @@ def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doub
     if checkBoxYear.isChecked():
         year = '.%y'
     new_year = list_date[4].split('.')[-1]
+    list_klass1 = []
+    # каникулы 1 класса
+    d1 = datetime.strptime(list_date[8], '%d.%m.%Y') 
+    d2 = datetime.strptime(list_date[9], '%d.%m.%Y')
+    delta = d2-d1
+    if delta.days > 0:
+        for i in range(delta.days + 1):
+            d = d1 + timedelta(i)
+            list_klass1.append(d.strftime('%d.%m.%Y'))
     for i in range(0, 7, 2):
         d1 = datetime.strptime(list_date[i], '%d.%m.%Y')
         d2 = datetime.strptime(list_date[i+1], '%d.%m.%Y')
         delta = d2 - d1
         for j in range(delta.days + 1):
             d = d1 + timedelta(j)
-            if diff_hours and d.year == int(new_year):
-                weekday = weekday2
-                doubleday = doubleday2
-            if d.weekday() in weekday:
-                list_days.append(d.strftime('%d.%m'+year))
-                if d.weekday() in doubleday:
+            day = d.weekday()
+            if d.strftime('%d.%m.%Y') in dict_date_replaced.keys():
+                day = dict_date_replaced[d.strftime('%d.%m.%Y')]
+            if d.strftime('%d.%m.%Y') not in list_date_holidays:
+                if klass1:
+                    if d.strftime('%d.%m.%Y') in list_klass1:
+                        continue
+                if diff_hours and d.year == int(new_year):
+                    weekday = weekday2
+                    doubleday = doubleday2
+                if day in weekday:
                     list_days.append(d.strftime('%d.%m'+year))
-            if d.weekday() in list_all_days:
-                all_days += 1
-            dict_days[d.weekday()] += 1
+                    if day in doubleday:
+                        list_days.append(d.strftime('%d.%m'+year))
+                if day in list_all_days:
+                    all_days += 1
+                dict_days[day] += 1
 
 def checkValidDatesArr(d1, d2):
     d1 = datetime.strptime(d1, '%d.%m.%Y')
@@ -336,7 +481,7 @@ class ReadHoursThread(QtCore.QThread):
                     count_hours += 1
                     self.labelHoursChangeSignal.emit('Найдено часов: '+str(count_hours))
                     sleep(0.001)
-            if 1 not in list_one or count_hours%34 != 0:
+            if 1 not in list_one or count_hours%17 != 0:
                 count_hours = 0
                 one = 0
                 column_with_days = 1
@@ -364,7 +509,7 @@ def on_finished_read_hours():
     checkBoxSetCol.setChecked(False)
     labelProgress.setText('Заполнено 0 из '+str(count_hours))
     progressBar.setValue(0)
-    if count_hours % 34 == 0 and count_hours != 0:
+    if count_hours % 17 == 0 and count_hours != 0:
         labelHours.setStyleSheet('QWidget {color: rgb(28, 153, 0);%s}'%WIN_css)
     else:
         labelHours.setStyleSheet('QWidget {color: rgb(255, 0, 0);%s}'%WIN_css)
@@ -524,10 +669,17 @@ def getColumnsNames():
 pushButtonFill.setFocus()
 fixFontIfWIN()
 loadDateFromFile()
+loadHolidaysFromFile()
+loadReplacedFromFile()
 loadDateToApp()
+loadHolidaysToApp()
+loadReplaceToApp()
 makeListOfDays()
 loadWeekDays()
 connectSignals()
+
+checkBox1klassClick(False)
+win.resize(100, 100)
 
 win.show()
 check_version_thread.start()
