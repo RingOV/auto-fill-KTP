@@ -66,7 +66,6 @@ def dateFmt(date):
 app = QtWidgets.QApplication([])
 win = uic.loadUi('main.ui')
 win.groupBoxNewVer.hide()
-# win.tabWidget.setTabVisible(1, False)
 win.tabWidget.tabBar().hide()
 win.labelVersion.setText(version)
 win_about = uic.loadUi('about.ui')
@@ -90,6 +89,7 @@ def fixFontIfWIN():
     if WIN:
         font_size = 'QWidget {font-size: 11pt;}'
         win.setStyleSheet(font_size)
+        win_dialog.setStyleSheet(font_size)
         win.pushButtonFill.setStyleSheet('QWidget {font-size: 16pt;}')
         for i in range(1, 5):
             globals()['label0'+str(i)].setStyleSheet('QWidget {font-size: 12pt;}')
@@ -145,7 +145,6 @@ def loadReplaceToApp():
 def connectSignals():
     for i in range(10):
         globals()['dateEdit'+str(i)].dateChanged.connect(lambda: changedDateEdit())
-        # globals()['dateEdit'+str(i)].setStyleSheet('QWidget {%s}'%WIN_css)
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].clicked.connect(lambda: readWeekDays())
         globals()['spinBoxWeek'+str(i)].valueChanged.connect(lambda: readWeekDays())
