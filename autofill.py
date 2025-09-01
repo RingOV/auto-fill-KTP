@@ -154,7 +154,7 @@ def loadHolidays2ToApp():
     listWidgetHolidays2.clear()
     for el in range_date_holidays:
         item = QtWidgets.QListWidgetItem(el[0] + ' - ' + el[1])
-        if el[2] == '2':
+        if el[2] == '1':
             item.setCheckState(QtCore.Qt.CheckState.Checked)
         else:
             item.setCheckState(QtCore.Qt.CheckState.Unchecked)
@@ -202,7 +202,7 @@ def connectSignals():
 
 def listWidgetHolidays2ItemClicked():
     for i in range(len(range_date_holidays)):
-        range_date_holidays[i][2] = str(listWidgetHolidays2.item(i).checkState())
+        range_date_holidays[i][2] = str(int(listWidgetHolidays2.item(i).checkState() == QtCore.Qt.CheckState.Checked))
     saveHolidays2ToFile()
     makeListOfDays()
     loadWeekDays()

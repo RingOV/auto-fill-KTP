@@ -1880,7 +1880,7 @@
        <item>
         <widget class="QPlainTextEdit" name="plainTextEdit">
          <property name="enabled">
-          <bool>false</bool>
+          <bool>true</bool>
          </property>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Ignored" vsizetype="Expanding">
