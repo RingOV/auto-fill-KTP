@@ -14,34 +14,34 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Замена дней недели</string>
+   <string>Дополнительные каникулы</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QDateEdit" name="dateEditReplace">
+      <widget class="QDateEdit" name="dateEditAdd1"/>
+     </item>
+     <item>
+      <widget class="QDateEdit" name="dateEditAdd2">
        <property name="calendarPopup">
         <bool>true</bool>
        </property>
       </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="comboBoxReplace"/>
      </item>
     </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QPushButton" name="pushButtonAddReplace">
+      <widget class="QPushButton" name="pushButtonAddHoliday">
        <property name="text">
         <string>+</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButtonDeleteReplace">
+      <widget class="QPushButton" name="pushButtonDeleteHoliday">
        <property name="text">
         <string>-</string>
        </property>
@@ -50,7 +50,7 @@
     </layout>
    </item>
    <item>
-    <widget class="QListWidget" name="listWidgetReplace"/>
+    <widget class="QListWidget" name="listWidgetHolidays2"/>
    </item>
    <item>
     <widget class="QPushButton" name="pushButton_3">

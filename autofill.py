@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from PyQt5 import QtCore, QtWidgets, uic
+from PyQt6 import QtCore, QtWidgets, uic
 import sys
 import os
 import docx
@@ -23,6 +23,7 @@ APP_PATH = os.path.abspath(os.path.dirname(sys.argv[0]))
 list_date = ['01.09.2022', '29.10.2022', '07.11.2022', '30.12.2022', '09.01.2023', '25.03.2023', '03.04.2023', '25.05.2023', '06.02.2023', '12.02.2023']
 list_date_holidays = ['23.02.2023', '24.02.2023', '08.03.2023', '01.05.2023', '08.05.2023', '09.05.2023']
 dict_date_replaced = {'25.05.2023': 0}
+range_date_holidays = []
 list_days = []
 all_days = 0
 dict_days = {}
@@ -57,13 +58,13 @@ dict_replaced_weekdays = {
 
 list_weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота']
 
-version = 'Версия 1.5 от 24.08.2022'
+version = 'Версия 1.8 от 29.08.2025'
 
 def dateFmt(date):
     return(QtCore.QDate.fromString(date, 'dd.MM.yyyy'))
 
 # загрузка окна
-app = QtWidgets.QApplication([])
+app = QtWidgets.QApplication(sys.argv)
 win = uic.loadUi('main.ui')
 win.groupBoxNewVer.hide()
 win.tabWidget.tabBar().hide()
@@ -115,6 +116,15 @@ def loadHolidaysFromFile():
                 list_date_holidays.append(line.strip())
         print('Holidays loaded from file')
 
+def loadHolidays2FromFile():
+    global range_date_holidays
+    if os.path.exists(os.path.join(APP_PATH, 'сохранённые дополнительные каникулы.txt')):
+        with open(os.path.join(APP_PATH, 'сохранённые дополнительные каникулы.txt'), 'r') as f:
+            range_date_holidays = []
+            for line in f:
+                range_date_holidays.append(line.split())
+        print('Holidays2 loaded from file')
+
 def loadReplacedFromFile():
     global dict_date_replaced
     if os.path.exists(os.path.join(APP_PATH, 'сохранённые замены дней недели.txt')):
@@ -126,13 +136,29 @@ def loadReplacedFromFile():
         print('Replaced loaded from file')
 
 def loadDateToApp():
-    for i in range(10):
+    for i in range(16):
         globals()['dateEdit'+str(i)].setDate(dateFmt(list_date[i]))
 
 def loadHolidaysToApp():
     dateEditHoliday.setDate(dateFmt(list_date[0]))
     listWidgetHolidays.clear()
     listWidgetHolidays.addItems(list_date_holidays)
+
+def loadHolidays2ToApp():
+    if len(range_date_holidays):
+        dateEditAdd1.setDate(dateFmt(range_date_holidays[-1][0]))
+        dateEditAdd2.setDate(dateFmt(range_date_holidays[-1][1]))
+    else:
+        dateEditAdd1.setDate(dateFmt('01.09.2024'))
+        dateEditAdd2.setDate(dateFmt('01.09.2024'))
+    listWidgetHolidays2.clear()
+    for el in range_date_holidays:
+        item = QtWidgets.QListWidgetItem(el[0] + ' - ' + el[1])
+        if el[2] == '2':
+            item.setCheckState(QtCore.Qt.CheckState.Checked)
+        else:
+            item.setCheckState(QtCore.Qt.CheckState.Unchecked)
+        listWidgetHolidays2.addItem(item)
 
 def loadReplaceToApp():
     s = []
@@ -143,7 +169,7 @@ def loadReplaceToApp():
     win_dialog.listWidgetReplace.addItems(s)
 
 def connectSignals():
-    for i in range(10):
+    for i in range(16):
         globals()['dateEdit'+str(i)].dateChanged.connect(lambda: changedDateEdit())
     for i in range(6):
         globals()['checkBoxWeek'+str(i)].clicked.connect(lambda: readWeekDays())
@@ -165,10 +191,22 @@ def connectSignals():
     checkBoxDiffHours.clicked.connect(checkBoxDiffHoursClick)
     pushButtonAddHoliday.clicked.connect(lambda: pushButtonAddHolidayClick())
     pushButtonDeleteHoliday.clicked.connect(lambda: pushButtonDeleteHolidayClick())
+    pushButtonDeleteHoliday2.clicked.connect(lambda: pushButtonDeleteHoliday2Click())
     pushButtonReplace.clicked.connect(lambda: win_dialog.show())
     win_dialog.pushButtonAddReplace.clicked.connect(lambda: pushButtonAddReplaceClick())
+    pushButtonAddHoliday2.clicked.connect(lambda: pushButtonAddHolidays2Click())
     win_dialog.pushButtonDeleteReplace.clicked.connect(lambda: pushButtonDeleteReplaceClick())
     checkBox1klass.clicked.connect(checkBox1klassClick)
+    tabWidgetPeriods.currentChanged.connect(lambda: changedDateEdit())
+    listWidgetHolidays2.itemClicked.connect(lambda: listWidgetHolidays2ItemClicked())
+
+def listWidgetHolidays2ItemClicked():
+    for i in range(len(range_date_holidays)):
+        range_date_holidays[i][2] = str(listWidgetHolidays2.item(i).checkState())
+    saveHolidays2ToFile()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
 
 def checkBox1klassClick(state):
     global klass1
@@ -208,6 +246,20 @@ def pushButtonAddReplaceClick():
     loadWeekDays()
     readWeekDays()
 
+def sort_comp(el):
+    el = el[0].split('.')[::-1]
+    return int(''.join(el))
+
+def pushButtonAddHolidays2Click():
+    global range_date_holidays
+    range_date_holidays.append([dateEditAdd1.dateTime().toString('dd.MM.yyyy'), dateEditAdd2.dateTime().toString('dd.MM.yyyy'), '2'])
+    range_date_holidays.sort(key=sort_comp)
+    saveHolidays2ToFile()
+    loadHolidays2ToApp()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
 def pushButtonDeleteHolidayClick():
     global list_date_holidays
     listItems = listWidgetHolidays.selectedItems()
@@ -217,6 +269,19 @@ def pushButtonDeleteHolidayClick():
         list_date_holidays.remove(item.text())
     loadHolidaysToApp()
     saveHolidaysToFile()
+    makeListOfDays()
+    loadWeekDays()
+    readWeekDays()
+
+def pushButtonDeleteHoliday2Click():
+    global range_date_holidays
+    listItems = listWidgetHolidays2.selectedItems()
+    if not listItems:
+        return
+    for item in listItems:
+        range_date_holidays.remove(item.text().split()[::2] + [str(item.checkState())])
+    loadHolidays2ToApp()
+    saveHolidays2ToFile()
     makeListOfDays()
     loadWeekDays()
     readWeekDays()
@@ -276,14 +341,14 @@ def on_label_link_show(show):
         win_help.groupBoxLink.hide()
 
 check_version_thread = CheckVersionThread()
-check_version_thread.labelStatusChangeSignal.connect(on_label_status_change, QtCore.Qt.QueuedConnection)
-check_version_thread.labelLinkShowSignal.connect(on_label_link_show, QtCore.Qt.QueuedConnection)
+check_version_thread.labelStatusChangeSignal.connect(on_label_status_change)
+check_version_thread.labelLinkShowSignal.connect(on_label_link_show)
 
 def checkNewVersion():
     try:
         url = 'https://sourceforge.net/projects/autofillktp/files/'
         html = urlopen(url, timeout=5).read().decode('utf-8')
-        s = re.findall('latest.*title=(.*?)\.zip', html)
+        s = re.findall(r'latest.*title=(.*?)\.zip', html)
         new_ver = s[0].split()[-1]
         old_ver = version.split()[1]
         if int(float(new_ver)*100) > int(float(old_ver)*100):
@@ -316,7 +381,9 @@ def setColumnWithDay(index):
 
 def changedDateEdit():
     global list_days, dict_days, all_days
-    for i in range(0, 7):
+    for i in range(0, 15):
+        if i in (7, 8, 9):
+            continue
         d1 = globals()['dateEdit'+str(i)].dateTime().toString('dd.MM.yyyy')
         d2 = globals()['dateEdit'+str(i+1)].dateTime().toString('dd.MM.yyyy')
 
@@ -346,7 +413,8 @@ def loadWeekDays():
 
 def saveDateToFile():
     global list_date
-    for i in range(10):
+    list_date = [0] * 16
+    for i in range(16):
         list_date[i] = globals()['dateEdit'+str(i)].dateTime().toString('dd.MM.yyyy')
     with open(os.path.join(APP_PATH, 'сохранённый диапазон дат.txt'), 'w') as f:
         f.write('\n'.join(list_date))
@@ -356,6 +424,12 @@ def saveHolidaysToFile():
     with open(os.path.join(APP_PATH, 'сохранённые праздничные дни.txt'), 'w') as f:
         f.write('\n'.join(list_date_holidays))
     print('Holidays saved to file')
+
+def saveHolidays2ToFile():
+    with open(os.path.join(APP_PATH, 'сохранённые дополнительные каникулы.txt'), 'w') as f:
+        for el in range_date_holidays:
+            f.write(el[0] + ' ' + el[1] + ' ' + str(el[2]) + '\n')
+    print('Holidays2 saved to file')
 
 def saveReplacedToFile():
     l = []
@@ -376,6 +450,18 @@ def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doub
     if checkBoxYear.isChecked():
         year = '.%y'
     new_year = list_date[4].split('.')[-1]
+    list_holidays = []
+    # список дополнительных каникул
+    for el in range_date_holidays:
+        if el[2] == '0':
+            continue
+        d1 = datetime.strptime(el[0], '%d.%m.%Y') 
+        d2 = datetime.strptime(el[1], '%d.%m.%Y')
+        delta = d2 - d1
+        if delta.days > 0:
+            for i in range(delta.days + 1):
+                d = d1 + timedelta(i)
+                list_holidays.append(d.strftime('%d.%m.%Y'))
     list_klass1 = []
     # каникулы 1 класса
     d1 = datetime.strptime(list_date[8], '%d.%m.%Y') 
@@ -385,7 +471,11 @@ def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doub
         for i in range(delta.days + 1):
             d = d1 + timedelta(i)
             list_klass1.append(d.strftime('%d.%m.%Y'))
-    for i in range(0, 7, 2):
+    if tabWidgetPeriods.currentIndex() == 0:
+        r = range(0, 7, 2)
+    else:
+        r = range(10, 15, 2)
+    for i in r:
         d1 = datetime.strptime(list_date[i], '%d.%m.%Y')
         d2 = datetime.strptime(list_date[i+1], '%d.%m.%Y')
         delta = d2 - d1
@@ -398,6 +488,8 @@ def makeListOfDays(weekday=[], selected = False, doubleday=[], weekday2=[], doub
                 if klass1:
                     if d.strftime('%d.%m.%Y') in list_klass1:
                         continue
+                if d.strftime('%d.%m.%Y') in list_holidays:
+                    continue
                 if diff_hours and d.year == int(new_year):
                     weekday = weekday2
                     doubleday = doubleday2
@@ -541,7 +633,7 @@ def on_label_hours_change(s):
 read_hours_thread = ReadHoursThread()
 read_hours_thread.finished.connect(on_finished_read_hours)
 read_hours_thread.started.connect(on_started_read_hours)
-read_hours_thread.labelHoursChangeSignal.connect(on_label_hours_change, QtCore.Qt.QueuedConnection)
+read_hours_thread.labelHoursChangeSignal.connect(on_label_hours_change)
 
 def openFiles():
     global file_name, table_number
@@ -605,8 +697,8 @@ def on_started_fill_table():
 fill_table_thread = FillTableThread()
 fill_table_thread.finished.connect(on_finished_fill_table)
 fill_table_thread.started.connect(on_started_fill_table)
-fill_table_thread.labelProgressChangeSignal.connect(on_label_progress_change, QtCore.Qt.QueuedConnection)
-fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change, QtCore.Qt.QueuedConnection)
+fill_table_thread.labelProgressChangeSignal.connect(on_label_progress_change)
+fill_table_thread.progressBarChangeSignal.connect(on_rogress_bar_change)
 
 
 def fill():
@@ -669,9 +761,11 @@ pushButtonFill.setFocus()
 fixFontIfWIN()
 loadDateFromFile()
 loadHolidaysFromFile()
+loadHolidays2FromFile()
 loadReplacedFromFile()
 loadDateToApp()
 loadHolidaysToApp()
+loadHolidays2ToApp()
 loadReplaceToApp()
 makeListOfDays()
 loadWeekDays()
